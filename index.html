@@ -83,7 +83,7 @@
             $('#txtResult').val('');
             var jsonObj = '{ "jsonrpc": "2.0", "id": "1", "method": "Player.Open", "params": { "item": { "file": "' + $('#txtUrl').val() + '" } } }';
 
-            var ws = new WebSocket('ws://' + $('#txtIpPort').val() + '/jsonrpc');
+            var ws = new WebSocket('wss://' + $('#txtIpPort').val() + '/jsonrpc');
             ws.onopen = function () {
                 ws.send(jsonObj);
             }
