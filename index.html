@@ -1,0 +1,111 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Kodi url player</title>
+</head>
+<body>
+    <div class="container">
+        <form>
+            <div class="form-group">
+                <label for="txtIpPort">Indirizzo ip-porta:</label>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="txtIpPort" aria-describedby="emailHelp" placeholder="ip:porta">
+                    </div>
+                    <div class="col-sm-8">
+                        <button type="submit" class="btn btn-primary" id="saveIp">Salva</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="txtUrl">Url video:</label>
+                <input type="text" class="form-control" id="txtUrl" aria-describedby="emailHelp" placeholder="url">
+            </div>
+            <div class="form-group">
+                <label for="txtResult">Risultato:</label>
+                <textarea class="form-control" id="txtResult" rows="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="playVideo">Invia</button>
+        </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+
+        function createCookie(name, value, days) {
+            var expires;
+
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            } else {
+                expires = "";
+            }
+            document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+        }
+
+        function readCookie(name) {
+            var nameEQ = encodeURIComponent(name) + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) === ' ')
+                    c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0)
+                    return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {
+            createCookie(name, "", -1);
+        }
+
+        $('#saveIp').click(function () {
+            createCookie('ip', $('#txtIpPort').val(), 365);
+            return false;
+        });
+
+        $('#playVideo').click(function () {
+            $('#txtResult').val('');
+            var jsonObj = '{ "jsonrpc": "2.0", "id": "1", "method": "Player.Open", "params": { "item": { "file": "' + $('#txtUrl').val() + '" } } }';
+
+            var ws = new WebSocket('ws://' + $('#txtIpPort').val() + '/jsonrpc');
+            ws.onopen = function () {
+                ws.send(jsonObj);
+            }
+            ws.onmessage = function (event) {
+                $("#txtResult").val(event.data);
+                ws.close();
+            }
+            ws.onerror = function (event) {
+                $("#txtResult").val(event.data);
+                ws.close();
+            };
+
+            return false;
+        });
+
+        $(document).ready(function () {
+            var ipValue = readCookie('ip');
+            if (ipValue) {
+                $('#txtIpPort').val(ipValue);
+            }
+        });
+
+    </script>
+</body>
+</html>
